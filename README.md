@@ -15,29 +15,28 @@ Prerequisites from [Docker primer Learn and Do](https://github.com/rtortori/ld-d
 Additional prerequisites for this Learn and Do:
 
 * [Create a free account on Docker Hub](https://hub.docker.com)
-* \[Optional\] An advanced text editor like [Sublime Text](https://www.sublimetext.com/), [Atom](https://atom.io/), or [Notepad ++](https://notepad-plus-plus.org/)
 
 #### Introduction
 
 In the [first episode](https://github.com/rtortori/ld-dockerprimer) we had a quick bite at Docker containers:
 
 1. We know that containers are not really existing in the host system but are a collection of OS features that allow to run processes and everything they depend on in a secure, isolated environment
-2. Containers are instances of images. Images are a stack of filesystem differences named layers that together form the root filesystem for the instantiated container
+2. Containers are instances of images. Images are a stack of filesystem differences, named layers, that together form the root filesystem for the instantiated container
 3. Each layer can be compared to a transparent sheet of paper, where some information are impresses. If you stack them and have a look at the combined result, a meaningful image appears. Layers are reusable
 
 We are going to run two labs in this Learn and Do:
 
-* Build container images
-* Container image structure and user capabilities
+1. Build container images
+2. Container image structure
 
 Let's get started. 
-First things first: deploy the lab infrastructure like we did in [the Docker primer L&D](https://github.com/rtortori/ld-dockerprimer):
+First things first: deploy the lab infrastructure like we did in [the Docker primer L&D](https://github.com/rtortori/ld-dockerprimer). It should take approximately 5 minutes:
 
 ```bash
 vagrant up
 ```
 
-#### Build container images (~30 minutes to complete)
+#### Lab 1: Build container images (~25 minutes to complete)
 
 On your machine ssh the developer VM:
 
@@ -78,7 +77,7 @@ containers101.py  requirements.txt
 </details>
 
 You will find two files, ```containers101.py``` is our sample application, it exposes a web page with the hostname of the host where the application is running.
-The file ```requirements.txt``` contains the list of the dependiencies the MUST be installed before run the application.
+The file ```requirements.txt``` contains the list of the dependiencies that MUST be installed before run the application.
 
 Without going into the application details, you can run the application in the developer VM. 
 
@@ -131,12 +130,12 @@ Open a browser and connect to ```http://localhost:8181```:
 
 ![app running as process](images/img1.png)
 
-Nice, the app is running smoothly and we can see in runs in the 'developer-vm' as shown in the browser. However, you are running it as a process and you had to install the required dependencies in the host itself.
+Nice, the app is running smoothly and we can see it runs in the 'developer-vm' as shown in the browser. However, you are running it as a process and you had to install the required dependencies in the host itself.
 
 Let's containerize this application!
-First of all, you need a 'Dockerfile', which is a special file that instructs Docker how this container should be built.
+First of all, you need a 'Dockerfile', which is a special file that instructs Docker about how this container should be built.
 
-In your terminal, hit CRTL+C to stop the running application:
+In your terminal, hit CTRL+C to stop the running application:
 
 ```bash
 [...]   
@@ -159,7 +158,7 @@ CMD python containers101.py
 EOF
 ```
 
-This command creates the Dockerfile. Each line represent one layer of our container image, as briefly described in the [Docker primer Learn and Do](https://github.com/rtortori/ld-dockerprimer).
+This command creates the Dockerfile. Each line represents one layer of our container image, as briefly described in the [Docker primer Learn and Do](https://github.com/rtortori/ld-dockerprimer).
 
 Here are the instructions we specified in the Dockerfile:
 
@@ -168,7 +167,7 @@ Here are the instructions we specified in the Dockerfile:
 | ------------- |-----------------------------------------|
 | FROM          | This is the base image we want to start from. It's generally an OS image, in this case 'alpine OS', a lightweight OS with python 3.7 pre-installed                  |
 | COPY          | We want to copy both requirements.txt and container101.py in the image, so we have everything we need in the container to run the application |
-| RUN           | This is what we want to execute at build time. We want out requirements to be installed in order to have our application working                          |
+| RUN           | This is what we want to execute at build time. We want our requirements to be installed in order to have our application working                          |
 | CMD           | This represents the command we want to execute once the container is started, in this case we want to run our container101.py application, like we did in the developer-vm a few minutes ago                  |
 
 from the current directory in the developer-vm, run the following command to build the image:
@@ -296,7 +295,7 @@ latest: digest: sha256:fe218fee39fd2e0d3348e8dbfaab861dcac5583615dcf81b46ff609db
 </pre>
 </details>
 
-Our containerized app image is now on Docker Hub, let's have a look!
+Our containerized app image is now on Docker Hub, let's have a look in [Docker Hub](https://hub.docker.com):
 
 ![docker hub](images/img2.png)
 
@@ -339,7 +338,7 @@ Open a web browser to ```http://localhost:8280```:
 
 ![prod](images/img3.png)
 
-As we can see, the application runs in an OS with 'strange' hostname :)<br>
+As we can see, the application runs in an OS with a 'strange' hostname :)<br>
 This is the actual container hostname as you can see running the ```docker ps``` command:
 
 ```bash
@@ -355,15 +354,21 @@ a7abd33ba347        rtortori/meetup     "/bin/sh -c 'python …"   5 minutes ago
 </pre>
 </details>
 
+Our containerized app is running successfully in Docker on our 'production-vm' machine. We didn't have to install anything except Docker.
+
+The image we prepared in the 'developer-vm' self-contains everything needed to run the application. This allows to run multiple applications (even using conflicting dependencies) in the same host, which can potentially never be touched in terms of library installations/updates, etc.
+
+This concept is also known as [Immutable Infrastructure](https://highops.com/insights/immutable-infrastructure-what-is-it/).
+
 This ends the first lab.
 
 
-#### Container image structure and user capabilities (~10 minutes to complete)
+#### Lab 2: Container image structure and user capabilities (~20 minutes to complete)
 
 We've successfully built and uploaded our image to Docker Hub and we demostrated you can run containerized application everywhere. You just need the Docker engine installed.
 
 We will now focus a few minutes on the layer structure.
-In the [Docker primer Learn and Do](https://github.com/rtortori/ld-dockerprimer), we compared image layers to transparent sheets of paper where there's something printed on each of them. Once they are stacked, a meaningful picture will appear. The stack of the layers represents the root filesystem for our containers. Let's understand more how this process works.
+In the [Docker primer Learn and Do](https://github.com/rtortori/ld-dockerprimer), we compared image layers to transparent sheets of paper where there's something printed on each of them. Once they are stacked, a meaningful picture appears. The stack of the layers represents the root filesystem for our containers. Let's understand more how this process works.
 
 Create a Dockerfile:
 
@@ -423,7 +428,7 @@ This is file 1
 / #
 ```
 
-Exit the container with ```exit```.
+Exit the container with the ```exit``` command.
 
 Modify the Dockerfile with:
 
@@ -442,10 +447,10 @@ We now added two extra layers. Let's see what is the order of operations here:
 1. Start from the Alpine base image
 2. Create a file named ```file1.txt```
 3. Create a file named ```file2.txt```
-4. Remove file1
+4. Remove file1.txt
 5. Sleep for 1 hour
 
-Let's build it, this time with tag **v2***:
+Let's build it, this time with tag **v2**:
 
 ```bash
 docker build . -t sleeper:v2
@@ -532,14 +537,6 @@ IMAGE               CREATED             CREATED BY                              
 <missing>           5 weeks ago         /bin/sh -c #(nop) ADD file:fe64057fbb83dccb9…   5.58MB
 ```
 
-sleeper Dockerfile:
-
-```bash
-FROM alpine
-RUN echo "This is file 1" > file1.txt
-CMD sleep 3600
-```
-
 sleeper:v2 image:
 
 ```bash
@@ -553,9 +550,9 @@ IMAGE               CREATED             CREATED BY                              
 <missing>           5 weeks ago         /bin/sh -c #(nop) ADD file:fe64057fbb83dccb9…   5.58MB
 ```
 
-As we can see, we share the *961769676411* and *093804881ed5* layers and the content is identical. Each action we perform adds an additional layer to the image, this is why it's [best practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/) to leverage [build cache](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#leverage-build-cache) and order Dockerfile instructions from the less frequently changed to the more frequently changed.
+As we can see, we share the *961769676411* and *093804881ed5* layers as the content is identical at that point in build phase. Each action we perform adds an additional layer to the image, this is why it's [best practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/) to leverage [build cache](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#leverage-build-cache) and order Dockerfile instructions from the less frequently changed to the more frequently changed.
 
-From this output we also see that *file1.txt* is actually present in layer 093804881ed5, let's see where it is hiding.
+From this output we can also assume that *file1.txt* is actually present in layer 093804881ed5, let's see where it is hiding.
 
 We mentioned in the previous Learn and Do that layers are basically a collection of filesystem diffs.<br> 
 The [docker inspect](https://docs.docker.com/engine/reference/commandline/inspect/) returns low-level information on Docker objects. We are interested in layers and where they live inside the host filesystem:
@@ -680,7 +677,7 @@ We are interested mainly on this part of the output:
 
 ```
 
-Let's inspect the content of the last directory of 'LowerDir'. First, we need to become root user:
+Let's inspect the content of the second directory listed of 'LowerDir'. First, we need to become root user:
 
 ```bash
 sudo -i
@@ -696,9 +693,9 @@ ls && cat file1.txt
 
 *file1.txt* is already there as we are still using that layer for our image.
 
-To take back the transparent sheets analogy, if you apply correction fluid on upper layers to hide (remove) some data on the lower layers, you might not see that data when you see the layers stacked, however since yoy own all 'sheets', if you inspect them individually you will still access data.
+Let's return to the stack of transparent sheets analogy, if you apply correction fluid on upper layers to hide (remove) some data on the lower layers, you might not see that data when you see the layers stacked, however since you have access to all 'sheets', if you inspect them individually you will still access data.
 
-As this is a potential security flaw, as you might reuse layers that contain sensitive details like passwords, certificates, etc. It's best practice to not build such information on Docker layers. An example would be to pass data as environment variables.
+This could be a potential security flaw, as you might reuse layers that contain sensitive details like passwords, certificates, etc. It's best practice to not store such information on Docker layers. An example would be to pass data as environment variables.
 
 You can set environment variables very easily with the docker client. Here's an example:
 
@@ -722,8 +719,9 @@ PWD=/
 
 This ends the second lab of this Learn and Do.
 
-Go ahead and destroy the infrastrure if you are done. Go back to your terminal, where you originally run the command 'vagrant up'. Clean up the environment with the following command:
+Go ahead and destroy the infrastructure if you are done. Exit the 'production-vm' using the command ```exit```. 
+Clean up the environment with the following command:
 
 ```bash
-vagrant destroy
+vagrant destroy -f
 ```
