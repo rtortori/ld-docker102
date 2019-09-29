@@ -363,7 +363,7 @@ This concept is also known as [Immutable Infrastructure](https://highops.com/ins
 This ends the first lab.
 
 
-#### Lab 2: Container image structure and user capabilities (~20 minutes to complete)
+#### Lab 2: Container image structure (~20 minutes to complete)
 
 We've successfully built and uploaded our image to Docker Hub and we demostrated you can run containerized application everywhere. You just need the Docker engine installed.
 
