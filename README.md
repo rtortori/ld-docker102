@@ -30,7 +30,17 @@ We are going to run two labs in this Learn and Do:
 2. Container image structure
 
 Let's get started. 
-First things first: deploy the lab infrastructure like we did in [the Docker primer L&D](https://github.com/rtortori/ld-dockerprimer). It should take approximately 5 minutes:
+First things first: clone this repo and deploy the lab infrastructure like we did in [the Docker primer L&D](https://github.com/rtortori/ld-dockerprimer). It should take approximately 5 minutes:
+
+On your machine, pick any directory for this project and download the material required for the exercises using the following command in the terminal or Windows Powershell:
+
+```bash
+git clone https://github.com/rtortori/ld-docker102.git
+```
+
+```bash
+cd ld-docker102
+```
 
 ```bash
 vagrant up
